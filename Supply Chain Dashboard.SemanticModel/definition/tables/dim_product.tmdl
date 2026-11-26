@@ -1,0 +1,121 @@
+table dim_product
+	lineageTag: 2b8cea76-4386-4e15-841c-f5ccdc8a38fd
+
+	/// Numeric source identifier for one product record.
+	column product_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 614d7b18-0bc3-42f0-a117-1c3e4ca33431
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source business code for the product.
+	column product_key
+		dataType: string
+		lineageTag: 14be570d-718c-4876-8709-8feb5eca597f
+		summarizeBy: none
+		sourceColumn: product_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Catalog product name. A name can cover more than one SKU.
+	column product_name
+		dataType: string
+		lineageTag: 273afc3a-7d44-4ba8-a240-c2fc16d3192a
+		summarizeBy: none
+		sourceColumn: product_name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Current product category.
+	column category
+		dataType: string
+		lineageTag: 9ce7b495-d3a4-4999-b9ee-1227fef8e46a
+		summarizeBy: none
+		sourceColumn: category
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Current product family.
+	column product_line
+		dataType: string
+		lineageTag: f53d37ab-533d-4b06-8564-3a06d533cd2f
+		summarizeBy: none
+		sourceColumn: product_line
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source SKU specification, including variant or capacity.
+	column spec
+		dataType: string
+		lineageTag: 8d99b68c-fd81-460c-b508-863869e601bf
+		summarizeBy: none
+		sourceColumn: spec
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Current SKU color.
+	column color
+		dataType: string
+		lineageTag: 65b4a5ea-844a-42d3-bdcb-bd3ec09779c3
+		summarizeBy: none
+		sourceColumn: color
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Recorded price per item in USD.
+	column unit_price
+		dataType: double
+		lineageTag: 8e22aa0d-cafa-4826-bc4a-0c48152aa7cf
+		summarizeBy: none
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Recorded cost per item in USD.
+	column unit_cost
+		dataType: double
+		lineageTag: eb9ed8b8-27a3-4de1-ab42-2dc32304ef83
+		summarizeBy: none
+		sourceColumn: unit_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Catalog weight per item, in kilograms.
+	column weight_kg
+		dataType: double
+		lineageTag: 513a178f-60fb-433a-ad36-620d8aeaa187
+		summarizeBy: none
+		sourceColumn: weight_kg
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Product image URL from the catalog.
+	column Img
+		dataType: string
+		lineageTag: 5cc25d95-5b04-4362-bd51-38014609d38c
+		summarizeBy: none
+		sourceColumn: Img
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_product = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\dim_product.csv"), [Delimiter = ",", Columns = 11, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"product_id", Int64.Type}, {"product_key", type text}, {"product_name", type text}, {"category", type text}, {"product_line", type text}, {"spec", type text}, {"color", type text}, {"unit_price", type number}, {"unit_cost", type number}, {"weight_kg", type number}, {"Img", type text}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

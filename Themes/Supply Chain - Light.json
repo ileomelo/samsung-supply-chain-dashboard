@@ -1,0 +1,120 @@
+{
+  "name": "Supply Chain - Light",
+  "dataColors": [
+    "#2563EB",
+    "#DC2626",
+    "#2CAA52",
+    "#DDCF31",
+    "#155646"
+  ],
+  "foreground": "#111827",
+  "foregroundNeutralSecondary": "#6B7280",
+  "foregroundNeutralTertiary": "#6B7280",
+  "background": "#F8FAFC",
+  "backgroundLight": "#F8FAFC",
+  "backgroundNeutral": "#F8FAFC",
+  "tableAccent": "#2563EB",
+  "textClasses": {
+    "callout": {
+      "color": "#111827"
+    },
+    "title": {
+      "color": "#111827"
+    },
+    "header": {
+      "color": "#111827"
+    },
+    "label": {
+      "color": "#6B7280"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#FFFFFF"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#F8FAFC"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#F8FAFC"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "title": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#111827"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "cardVisual": {
+      "*": {
+        "value": [
+          {
+            "$id": "default",
+            "fontColor": {
+              "solid": {
+                "color": "#111827"
+              }
+            }
+          }
+        ],
+        "label": [
+          {
+            "$id": "default",
+            "fontColor": {
+              "solid": {
+                "color": "#6B7280"
+              }
+            }
+          }
+        ],
+        "referenceLabelDetail": [
+          {
+            "$id": "default",
+            "detailFontColor": {
+              "solid": {
+                "color": "#6B7280"
+              }
+            },
+            "detailBackgroundColor": {
+              "solid": {
+                "color": "#F8FAFC"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

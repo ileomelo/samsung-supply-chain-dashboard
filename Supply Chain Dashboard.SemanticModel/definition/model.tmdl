@@ -1,0 +1,31 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["DatasetFolder","dim_customer","dim_date","dim_facility","dim_product","dim_supplier","fact_inventory","fact_procurement","fact_production","fact_sales","fact_shipment"]
+
+annotation PBI_ProTooling = ["DevMode","MCP-PBIModeling"]
+
+ref table dim_customer
+ref table dim_date
+ref table DateTableTemplate_24c47acf-e90b-4e2e-8b3f-fe338723f988
+ref table LocalDateTable_97f4cc5e-1d70-4576-87a1-4e8c1a65ab0a
+ref table dim_facility
+ref table dim_product
+ref table dim_supplier
+ref table fact_inventory
+ref table fact_procurement
+ref table fact_production
+ref table fact_sales
+ref table fact_shipment
+ref table '# Measures'
+
+ref cultureInfo en-US
+

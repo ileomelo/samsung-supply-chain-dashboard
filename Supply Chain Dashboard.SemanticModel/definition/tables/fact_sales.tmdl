@@ -1,0 +1,174 @@
+table fact_sales
+	lineageTag: b39138de-9b05-430e-970d-57494529ff31
+
+	/// Numeric source identifier for one sales record.
+	column sales_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 10e6fbea-c2b0-4dd7-baf1-1f80c13c88ec
+		summarizeBy: none
+		sourceColumn: sales_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for source sales.
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 41f488e2-4b80-4a4b-a25f-305e6d149184
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_product.product_id.
+	column product_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ef3cfc1b-364b-4838-b0df-9febad6ab843
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_customer.customer_id.
+	column customer_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e7ad386e-1e0f-4901-83d0-b8cca8a0e155
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Recorded number of item units sold.
+	column quantity_sold
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 1ce0b907-26ff-4360-aa7d-290eebdc90f6
+		summarizeBy: none
+		sourceColumn: quantity_sold
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Recorded price per item in USD.
+	column unit_price
+		dataType: double
+		isHidden
+		lineageTag: 5f0db43a-06c3-4588-b9ab-bb50e101f9d1
+		summarizeBy: none
+		sourceColumn: unit_price
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Source line discount in percentage points, e.g. 10 means 10%.
+	column discount_pct
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: e35b87f2-91ea-42bc-a3db-e4c0b0c0acb7
+		summarizeBy: none
+		sourceColumn: discount_pct
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Line discount in US dollars.
+	column discount_amount
+		dataType: double
+		isHidden
+		lineageTag: 826bcdae-9e11-4b36-99a6-6d2e272ef2a5
+		summarizeBy: none
+		sourceColumn: discount_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Line gross sales before discount, in US dollars.
+	column gross_revenue
+		dataType: double
+		isHidden
+		lineageTag: 316052f5-3c26-4859-9563-aac89d63775e
+		summarizeBy: none
+		sourceColumn: gross_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Line sales after discount, in US dollars.
+	column net_revenue
+		dataType: double
+		isHidden
+		lineageTag: 2ef104f6-effe-4284-956a-a097c5c9553f
+		summarizeBy: none
+		sourceColumn: net_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Extended line cost in US dollars.
+	column total_cost
+		dataType: double
+		isHidden
+		lineageTag: d5fbab59-d356-49f8-9c53-ec29ba9c3086
+		summarizeBy: none
+		sourceColumn: total_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Line net sales less line cost, in US dollars.
+	column profit
+		dataType: double
+		isHidden
+		lineageTag: 0215bb1e-aacc-4dfc-b330-37ec777d347d
+		summarizeBy: none
+		sourceColumn: profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Source line profit margin in percentage points. Use Sales Profit Margin for totals.
+	column profit_margin_pct
+		dataType: double
+		isHidden
+		lineageTag: 174b0117-ad24-4754-82cd-a3c00eed3f5d
+		summarizeBy: none
+		sourceColumn: profit_margin_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Sales document reference. The same text can occur for different customers and dates.
+	column order_number
+		dataType: string
+		lineageTag: f9af8603-7d46-4824-bef7-1661672e936f
+		summarizeBy: none
+		sourceColumn: order_number
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_sales = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\fact_sales.csv"), [Delimiter = ",", Columns = 14, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"sales_id", Int64.Type}, {"date_key", Int64.Type}, {"product_id", Int64.Type}, {"customer_id", Int64.Type}, {"quantity_sold", Int64.Type}, {"unit_price", type number}, {"discount_pct", Int64.Type}, {"discount_amount", type number}, {"gross_revenue", type number}, {"net_revenue", type number}, {"total_cost", type number}, {"profit", type number}, {"profit_margin_pct", type number}, {"order_number", type text}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

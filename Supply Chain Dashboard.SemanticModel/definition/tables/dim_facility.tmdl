@@ -1,0 +1,89 @@
+table dim_facility
+	lineageTag: 79eca695-db4d-4889-a949-c969b9288717
+
+	/// Numeric source identifier for one facility record.
+	column facility_id
+		dataType: int64
+		formatString: 0
+		lineageTag: f47b31df-015d-4591-ab69-4f9b2d2f776c
+		summarizeBy: none
+		sourceColumn: facility_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source business code for the facility.
+	column facility_key
+		dataType: string
+		lineageTag: b972a31d-3b22-4421-8c0d-b64185301564
+		summarizeBy: none
+		sourceColumn: facility_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Current facility name.
+	column facility_name
+		dataType: string
+		lineageTag: e77fcd8f-f225-4baa-8254-14b0629d5e54
+		summarizeBy: none
+		sourceColumn: facility_name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Country in the current master record.
+	column country
+		dataType: string
+		lineageTag: 9d9e82d9-d737-4d4f-a7f0-751eadbc4d3f
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	/// City in the current master record.
+	column city
+		dataType: string
+		lineageTag: f5df0d51-eef0-4791-aa4b-8e034cd30e5f
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Facility classification.
+	column facility_type
+		dataType: string
+		lineageTag: 4a9c1a92-8d42-4aa7-90f8-58b6372baf81
+		summarizeBy: none
+		sourceColumn: facility_type
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Facility specialization.
+	column specialization
+		dataType: string
+		lineageTag: f973035d-41e2-48a1-a0e0-554f3b81d982
+		summarizeBy: none
+		sourceColumn: specialization
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Reference annual capacity from the facility master. The source does not specify a base year or unit.
+	column annual_capacity
+		dataType: int64
+		formatString: 0
+		lineageTag: 2687f1ab-dd23-4fc2-a5d4-149d56525072
+		summarizeBy: none
+		sourceColumn: annual_capacity
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_facility = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\dim_facility.csv"), [Delimiter = ",", Columns = 8, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"facility_id", Int64.Type}, {"facility_key", type text}, {"facility_name", type text}, {"country", type text}, {"city", type text}, {"facility_type", type text}, {"specialization", type text}, {"annual_capacity", Int64.Type}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

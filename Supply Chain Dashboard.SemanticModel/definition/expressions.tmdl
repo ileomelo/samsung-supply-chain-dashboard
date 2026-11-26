@@ -1,0 +1,5 @@
+/// Absolute path to the folder containing the project's ten source CSVs.
+expression DatasetFolder = "C:\Data\SamsungSupplyChain\Dataset" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 2b7a925c-c6c5-4dfb-8d6f-12e3db045133
+
+	annotation PBI_ResultType = Text

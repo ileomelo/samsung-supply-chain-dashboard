@@ -1,0 +1,102 @@
+table fact_production
+	lineageTag: da965e4b-63f0-4d68-b5b3-65ea1c9ff923
+
+	/// Numeric source identifier for one production record.
+	column production_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 84601dce-b324-44c9-91c3-80379bbb0c97
+		summarizeBy: none
+		sourceColumn: production_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for production.
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 0e83a29d-1f78-49f1-8096-882dc3b15306
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_product.product_id.
+	column product_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bc753c85-2c9c-481a-83e5-f465073bf943
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_facility.facility_id.
+	column facility_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9a137f9d-7009-4b92-b6bb-a38979c296aa
+		summarizeBy: none
+		sourceColumn: facility_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Recorded production quantity in item units.
+	column quantity_produced
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 99a343e9-4c94-4751-935b-3fd30864605d
+		summarizeBy: none
+		sourceColumn: quantity_produced
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Count of defective item units recorded for the production record.
+	column defective_units
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 9a0b3822-0443-4985-8663-2f77c3d5d205
+		summarizeBy: none
+		sourceColumn: defective_units
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source nominal defect rate in percentage points. Use Observed Defect Rate to report defective units / produced units.
+	column defect_rate_pct
+		dataType: double
+		isHidden
+		lineageTag: 50abb0f5-6d7f-4ede-b657-d670403542aa
+		summarizeBy: none
+		sourceColumn: defect_rate_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Source batch reference. Text can repeat across production records.
+	column batch_number
+		dataType: string
+		lineageTag: d77c23c8-48ec-4fe0-8430-2e92fd95b104
+		summarizeBy: none
+		sourceColumn: batch_number
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_production = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\fact_production.csv"), [Delimiter = ",", Columns = 8, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"production_id", Int64.Type}, {"date_key", Int64.Type}, {"product_id", Int64.Type}, {"facility_id", Int64.Type}, {"quantity_produced", Int64.Type}, {"defective_units", Int64.Type}, {"defect_rate_pct", type number}, {"batch_number", type text}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,120 @@
+{
+  "name": "Supply Chain - Dark",
+  "dataColors": [
+    "#2563EB",
+    "#DC2626",
+    "#2CAA52",
+    "#DDCF31",
+    "#155646"
+  ],
+  "foreground": "#F9FAFB",
+  "foregroundNeutralSecondary": "#D1D5DB",
+  "foregroundNeutralTertiary": "#D1D5DB",
+  "background": "#262A31",
+  "backgroundLight": "#292D38",
+  "backgroundNeutral": "#292D38",
+  "tableAccent": "#2563EB",
+  "textClasses": {
+    "callout": {
+      "color": "#F9FAFB"
+    },
+    "title": {
+      "color": "#F9FAFB"
+    },
+    "header": {
+      "color": "#F9FAFB"
+    },
+    "label": {
+      "color": "#D1D5DB"
+    }
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#0E1116"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#292D38"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    },
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": true,
+            "color": {
+              "solid": {
+                "color": "#262A31"
+              }
+            },
+            "transparency": 0
+          }
+        ],
+        "title": [
+          {
+            "fontColor": {
+              "solid": {
+                "color": "#F9FAFB"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "cardVisual": {
+      "*": {
+        "value": [
+          {
+            "$id": "default",
+            "fontColor": {
+              "solid": {
+                "color": "#F9FAFB"
+              }
+            }
+          }
+        ],
+        "label": [
+          {
+            "$id": "default",
+            "fontColor": {
+              "solid": {
+                "color": "#D1D5DB"
+              }
+            }
+          }
+        ],
+        "referenceLabelDetail": [
+          {
+            "$id": "default",
+            "detailFontColor": {
+              "solid": {
+                "color": "#D1D5DB"
+              }
+            },
+            "detailBackgroundColor": {
+              "solid": {
+                "color": "#262A31"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

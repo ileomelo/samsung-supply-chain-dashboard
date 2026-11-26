@@ -1,0 +1,80 @@
+table dim_customer
+	lineageTag: 11e97394-c8cf-4d05-a3fa-57e1fcb95c56
+
+	/// Numeric source identifier for one customer record.
+	column customer_id
+		dataType: int64
+		formatString: 0
+		lineageTag: 7ed64472-9d18-4c7b-8ad6-4e2cf51a259b
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source business code for the customer.
+	column customer_key
+		dataType: string
+		lineageTag: 22c5463e-8f79-4549-bdb1-b02ac0b20d02
+		summarizeBy: none
+		sourceColumn: customer_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Current customer name.
+	column customer_name
+		dataType: string
+		lineageTag: 7812d384-80af-4e09-972a-f233a4132c73
+		summarizeBy: none
+		sourceColumn: customer_name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Country in the current master record.
+	column country
+		dataType: string
+		lineageTag: f84fe1e8-1c22-4f5d-91ab-df87ba849d40
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sales channel in the customer master.
+	column channel_type
+		dataType: string
+		lineageTag: f204daea-6668-4f58-91fb-be147e8eda18
+		summarizeBy: none
+		sourceColumn: channel_type
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Customer size segment.
+	column size
+		dataType: string
+		lineageTag: e31c6052-b303-4abc-88c1-3d2c799fa27a
+		summarizeBy: none
+		sourceColumn: size
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Reference annual volume in US dollars from the customer master. Base year is unspecified.
+	column annual_volume_usd
+		dataType: int64
+		formatString: 0
+		lineageTag: 460859af-b74d-4a56-adde-6c6d8b86fc83
+		summarizeBy: none
+		sourceColumn: annual_volume_usd
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_customer = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\dim_customer.csv"), [Delimiter = ",", Columns = 7, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"customer_id", Int64.Type}, {"customer_key", type text}, {"customer_name", type text}, {"country", type text}, {"channel_type", type text}, {"size", type text}, {"annual_volume_usd", Int64.Type}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

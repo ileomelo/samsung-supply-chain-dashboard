@@ -1,0 +1,142 @@
+table dim_date
+	lineageTag: b2f7bf7b-a91a-4067-9c61-951c40266e80
+	dataCategory: Time
+
+	/// Sequential dim_date key for calendar.
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 992a8fac-0ca1-4709-83cb-9f88aca1a071
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Gregorian calendar day.
+	column date
+		dataType: dateTime
+		isUnique
+		formatString: Long Date
+		lineageTag: 716b174b-0883-40f1-ba5c-5e7a9aeeba95
+		summarizeBy: none
+		sourceColumn: date
+
+		variation Variation
+			isDefault
+			relationship: 3e91be7e-be13-4c73-9518-b7a0960f158c
+			defaultHierarchy: LocalDateTable_97f4cc5e-1d70-4576-87a1-4e8c1a65ab0a.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	/// Calendar year.
+	column year
+		dataType: int64
+		formatString: 0
+		lineageTag: 473bb979-7f38-4072-af66-c6b7b3769057
+		summarizeBy: none
+		sourceColumn: year
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Calendar quarter, 1 to 4.
+	column quarter
+		dataType: int64
+		formatString: 0
+		lineageTag: 3a4b4e3a-99d2-4fdd-a0f7-6d3ad2796a29
+		summarizeBy: none
+		sourceColumn: quarter
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Calendar month number, January = 1.
+	column month
+		dataType: int64
+		formatString: 0
+		lineageTag: 4c4fc7eb-4e69-40a9-8946-8546660b617e
+		summarizeBy: none
+		sourceColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	/// English month name, sorted by month number.
+	column month_name
+		dataType: string
+		lineageTag: 1d216af5-673d-41a8-b03b-2397d38714de
+		summarizeBy: none
+		sourceColumn: month_name
+		sortByColumn: month
+
+		annotation SummarizationSetBy = Automatic
+
+	/// ISO week number. At year boundaries the ISO year may differ from the calendar year.
+	column week
+		dataType: int64
+		formatString: 0
+		lineageTag: 00d9498c-2d36-41bd-9f41-434ecfb0a521
+		summarizeBy: none
+		sourceColumn: week
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Day of month.
+	column day
+		dataType: int64
+		formatString: 0
+		lineageTag: f99f37aa-03d8-40e4-ad52-087a7446b544
+		summarizeBy: none
+		sourceColumn: day
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Monday = 0 through Sunday = 6.
+	column day_of_week
+		dataType: int64
+		formatString: 0
+		lineageTag: 3d909a67-7f98-40b6-8bc3-c705e3007a4f
+		summarizeBy: none
+		sourceColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	/// English weekday name, sorted Monday through Sunday.
+	column day_name
+		dataType: string
+		lineageTag: e1c6ea29-68bc-4af8-ba2a-c26c724e2441
+		summarizeBy: none
+		sourceColumn: day_name
+		sortByColumn: day_of_week
+
+		annotation SummarizationSetBy = Automatic
+
+	/// 1 for Saturday or Sunday, 0 otherwise.
+	column is_weekend
+		dataType: int64
+		formatString: 0
+		lineageTag: 5782052b-e45b-415c-9773-c9c2f07cd175
+		summarizeBy: none
+		sourceColumn: is_weekend
+
+		annotation SummarizationSetBy = Automatic
+
+	/// First calendar date of each month for chronological reporting.
+	column 'Month Start' = DATE ( dim_date[year], dim_date[month], 1 )
+		dataType: dateTime
+		formatString: MMM yyyy
+		lineageTag: 10af4f40-0748-4761-9c64-1c4e24afd9a3
+		summarizeBy: none
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\dim_date.csv"), [Delimiter = ",", Columns = 11, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"date_key", Int64.Type}, {"date", type date}, {"year", Int64.Type}, {"quarter", Int64.Type}, {"month", Int64.Type}, {"month_name", type text}, {"week", Int64.Type}, {"day", Int64.Type}, {"day_of_week", Int64.Type}, {"day_name", type text}, {"is_weekend", Int64.Type}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

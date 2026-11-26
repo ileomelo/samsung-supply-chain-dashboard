@@ -1,0 +1,152 @@
+table fact_shipment
+	lineageTag: 4f2365a6-cb05-43d5-aa05-62a9ae5ff796
+
+	/// Numeric source identifier for one shipment record.
+	column shipment_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 6a212d32-d223-46e5-83f9-3391970eae0a
+		summarizeBy: none
+		sourceColumn: shipment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for shipment dispatch.
+	column ship_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: bb4e4f11-6c6a-4e7a-9031-ad8669d4a224
+		summarizeBy: none
+		sourceColumn: ship_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for recorded shipment delivery, populated for every status.
+	column delivery_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 2931debb-afca-4b3f-967f-6492dadd44b1
+		summarizeBy: none
+		sourceColumn: delivery_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Original logistics product identifier. The crosswalk to master data is pending.
+	column product_id
+		dataType: int64
+		formatString: 0
+		displayFolder: Source identifiers
+		lineageTag: 43f9d59d-b928-4f34-bfd2-58acbb4bb3e9
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Original logistics facility identifier. The crosswalk to master data is pending.
+	column facility_id
+		dataType: int64
+		formatString: 0
+		displayFolder: Source identifiers
+		lineageTag: ee9e8c76-ffd5-4c11-835d-8789823ab58a
+		summarizeBy: none
+		sourceColumn: facility_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Original logistics customer identifier. The crosswalk to master data is pending.
+	column customer_id
+		dataType: int64
+		formatString: 0
+		displayFolder: Source identifiers
+		lineageTag: 0b8709b7-f4b4-48e7-bb2f-dc2193fb2355
+		summarizeBy: none
+		sourceColumn: customer_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Item units recorded for this shipment.
+	column quantity
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 8be63e84-e7ee-4b6d-8ead-35c752edbd32
+		summarizeBy: none
+		sourceColumn: quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Transport carrier recorded on the shipment.
+	column carrier
+		dataType: string
+		lineageTag: df4aeda6-cdc1-400b-b110-89cb6c2d4336
+		summarizeBy: none
+		sourceColumn: carrier
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Shipment status in the supplied extract. There is no status history.
+	column status
+		dataType: string
+		lineageTag: f8d6d376-67bc-42d2-8007-dd538a2a6a49
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Freight cost in US dollars recorded once per shipment.
+	column shipping_cost
+		dataType: double
+		isHidden
+		lineageTag: 6297e9cc-3542-404b-bab6-4fca9b153a6e
+		summarizeBy: none
+		sourceColumn: shipping_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Recorded weight for the shipment, in kilograms.
+	column total_weight_kg
+		dataType: double
+		isHidden
+		lineageTag: 20af2b71-b502-4fbd-923c-a258b1c2f40f
+		summarizeBy: none
+		sourceColumn: total_weight_kg
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Source tracking reference, unique in the supplied extract.
+	column tracking_number
+		dataType: string
+		lineageTag: f7b88c1a-fe34-4672-99d3-9bce3b2e2a54
+		summarizeBy: none
+		sourceColumn: tracking_number
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source reason for delay. Populated on records with status Delayed.
+	column delay_reason
+		dataType: string
+		lineageTag: 6db94647-d275-43dc-8155-045c04a26be3
+		summarizeBy: none
+		sourceColumn: delay_reason
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_shipment = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\fact_shipment.csv"), [Delimiter = ",", Columns = 13, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"shipment_id", Int64.Type}, {"ship_date_key", Int64.Type}, {"delivery_date_key", Int64.Type}, {"product_id", Int64.Type}, {"facility_id", Int64.Type}, {"customer_id", Int64.Type}, {"quantity", Int64.Type}, {"carrier", type text}, {"status", type text}, {"shipping_cost", type number}, {"total_weight_kg", type number}, {"tracking_number", type text}, {"delay_reason", type text}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

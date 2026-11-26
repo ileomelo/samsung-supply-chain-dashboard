@@ -1,0 +1,67 @@
+relationship 3e91be7e-be13-4c73-9518-b7a0960f158c
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dim_date.date
+	toColumn: LocalDateTable_97f4cc5e-1d70-4576-87a1-4e8c1a65ab0a.Date
+
+relationship inventory_date
+	fromColumn: fact_inventory.date_key
+	toColumn: dim_date.date_key
+
+relationship inventory_product
+	fromColumn: fact_inventory.product_id
+	toColumn: dim_product.product_id
+
+relationship inventory_facility
+	fromColumn: fact_inventory.facility_id
+	toColumn: dim_facility.facility_id
+
+relationship sales_date
+	fromColumn: fact_sales.date_key
+	toColumn: dim_date.date_key
+
+relationship sales_product
+	fromColumn: fact_sales.product_id
+	toColumn: dim_product.product_id
+
+relationship sales_customer
+	fromColumn: fact_sales.customer_id
+	toColumn: dim_customer.customer_id
+
+relationship procurement_order_date
+	fromColumn: fact_procurement.order_date_key
+	toColumn: dim_date.date_key
+
+relationship procurement_delivery_date
+	isActive: false
+	fromColumn: fact_procurement.delivery_date_key
+	toColumn: dim_date.date_key
+
+relationship procurement_product
+	fromColumn: fact_procurement.product_id
+	toColumn: dim_product.product_id
+
+relationship procurement_supplier
+	fromColumn: fact_procurement.supplier_id
+	toColumn: dim_supplier.supplier_id
+
+relationship production_date
+	fromColumn: fact_production.date_key
+	toColumn: dim_date.date_key
+
+relationship production_product
+	fromColumn: fact_production.product_id
+	toColumn: dim_product.product_id
+
+relationship production_facility
+	fromColumn: fact_production.facility_id
+	toColumn: dim_facility.facility_id
+
+relationship shipment_ship_date
+	fromColumn: fact_shipment.ship_date_key
+	toColumn: dim_date.date_key
+
+relationship shipment_delivery_date
+	isActive: false
+	fromColumn: fact_shipment.delivery_date_key
+	toColumn: dim_date.date_key
+

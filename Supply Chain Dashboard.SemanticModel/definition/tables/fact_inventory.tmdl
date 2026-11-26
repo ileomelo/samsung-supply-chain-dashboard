@@ -1,0 +1,92 @@
+table fact_inventory
+	lineageTag: 6fb8a452-35b6-4d14-86cd-77ad8abbf6d2
+
+	/// Numeric source identifier for one inventory record.
+	column inventory_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 113a3bf0-92b3-4b0f-8803-1a9fab8ebff8
+		summarizeBy: none
+		sourceColumn: inventory_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for snapshot.
+	column date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5394c1af-6f41-417a-89a6-e7114ef8182e
+		summarizeBy: none
+		sourceColumn: date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_product.product_id.
+	column product_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: a10c532c-a25e-4a0f-88b6-9f52ac8f5854
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_facility.facility_id.
+	column facility_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 227889d1-86f3-405f-a39b-5f37afb56d8b
+		summarizeBy: none
+		sourceColumn: facility_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Observed on-hand item units for one SKU and facility at month-end.
+	column stock_level
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d00b306c-2ca7-4e3d-92a1-288c6dab4a43
+		summarizeBy: none
+		sourceColumn: stock_level
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Safety stock threshold in item units for the same inventory position.
+	column safety_stock_level
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 5483c472-2b0d-4314-bafd-2011dc588333
+		summarizeBy: none
+		sourceColumn: safety_stock_level
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Reorder threshold in item units for the same inventory position.
+	column reorder_point
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: f87da148-49da-4c75-9d05-c134ed90adbb
+		summarizeBy: none
+		sourceColumn: reorder_point
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_inventory = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\fact_inventory.csv"), [Delimiter = ",", Columns = 7, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"inventory_id", Int64.Type}, {"date_key", Int64.Type}, {"product_id", Int64.Type}, {"facility_id", Int64.Type}, {"stock_level", Int64.Type}, {"safety_stock_level", Int64.Type}, {"reorder_point", Int64.Type}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

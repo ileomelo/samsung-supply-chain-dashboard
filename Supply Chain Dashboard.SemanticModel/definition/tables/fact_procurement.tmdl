@@ -1,0 +1,137 @@
+table fact_procurement
+	lineageTag: 1b08f271-5bef-4df8-9d33-1d1fc8150d8f
+
+	/// Numeric source identifier for one procurement record.
+	column procurement_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 07851b69-9cb4-4655-84dd-6d913d87b69c
+		summarizeBy: none
+		sourceColumn: procurement_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for purchase order.
+	column order_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dccace20-ae7f-4dc4-a986-ddff7e153f05
+		summarizeBy: none
+		sourceColumn: order_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_product.product_id.
+	column product_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: dedb7e8e-f7fd-403a-990e-62486f68422e
+		summarizeBy: none
+		sourceColumn: product_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Foreign key to dim_supplier.supplier_id.
+	column supplier_id
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fed29761-e7a7-47b1-b793-a5fa80a9ec5e
+		summarizeBy: none
+		sourceColumn: supplier_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Ordered item units on the procurement record.
+	column order_quantity
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 03a0a4e4-b8c6-4d31-a171-0aca0a239b72
+		summarizeBy: none
+		sourceColumn: order_quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Recorded cost per item in USD.
+	column unit_cost
+		dataType: double
+		isHidden
+		lineageTag: 8b76fd68-eee9-4391-9d02-2091670ca664
+		summarizeBy: none
+		sourceColumn: unit_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Extended line cost in US dollars.
+	column total_cost
+		dataType: double
+		isHidden
+		lineageTag: 36066b68-96e6-46bb-bc19-75d470a7b7da
+		summarizeBy: none
+		sourceColumn: total_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Reported lead time in days. Recorded delivery dates are capped at the calendar end.
+	column lead_time_days
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 794ffd27-2e3c-439d-b2d6-68da3eb2dbed
+		summarizeBy: none
+		sourceColumn: lead_time_days
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Sequential dim_date key for recorded procurement delivery, capped at the end of the source calendar.
+	column delivery_date_key
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 4128d320-71fb-4115-8451-026d1691cd94
+		summarizeBy: none
+		sourceColumn: delivery_date_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Observed quality score in source points on this procurement record.
+	column quality_score
+		dataType: double
+		isHidden
+		lineageTag: 3d7cf95b-22b9-4c9a-a2a1-936763147bc2
+		summarizeBy: none
+		sourceColumn: quality_score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	/// Purchase order reference. Text can repeat across suppliers and dates.
+	column po_number
+		dataType: string
+		lineageTag: 3770006a-16a7-4903-9211-70c6f88c3e69
+		summarizeBy: none
+		sourceColumn: po_number
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fact_procurement = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\fact_procurement.csv"), [Delimiter = ",", Columns = 11, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"procurement_id", Int64.Type}, {"order_date_key", Int64.Type}, {"product_id", Int64.Type}, {"supplier_id", Int64.Type}, {"order_quantity", Int64.Type}, {"unit_cost", type number}, {"total_cost", type number}, {"lead_time_days", Int64.Type}, {"delivery_date_key", Int64.Type}, {"quality_score", type number}, {"po_number", type text}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

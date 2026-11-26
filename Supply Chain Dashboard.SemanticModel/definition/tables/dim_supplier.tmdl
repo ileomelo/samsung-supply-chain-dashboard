@@ -1,0 +1,90 @@
+table dim_supplier
+	lineageTag: 28a7d3f2-40be-4cc6-90b1-0ef8f2f307b1
+
+	/// Numeric source identifier for one supplier record.
+	column supplier_id
+		dataType: int64
+		formatString: 0
+		lineageTag: fc9702c8-6b53-4d05-9707-db237cdfca9f
+		summarizeBy: none
+		sourceColumn: supplier_id
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Source business code for the supplier.
+	column supplier_key
+		dataType: string
+		lineageTag: bba6bec4-e54e-4e16-9351-6bf9377dfc21
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Current supplier name.
+	column supplier_name
+		dataType: string
+		lineageTag: 52119559-ccbd-48a3-a459-d5db3cb26b83
+		summarizeBy: none
+		sourceColumn: supplier_name
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Country in the current master record.
+	column country
+		dataType: string
+		lineageTag: a3e4cfef-badc-46ac-8d5f-d9ea18d10986
+		summarizeBy: none
+		sourceColumn: country
+
+		annotation SummarizationSetBy = Automatic
+
+	/// City in the current master record.
+	column city
+		dataType: string
+		lineageTag: debebae9-0b34-4d31-bc3d-84ca819dee28
+		summarizeBy: none
+		sourceColumn: city
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Supplier specialization.
+	column specialty
+		dataType: string
+		lineageTag: 38d0537f-656e-43c7-94fc-c90824ca6ffb
+		summarizeBy: none
+		sourceColumn: specialty
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Supplier tier from the master record.
+	column tier
+		dataType: string
+		lineageTag: 41e4ca94-4ce3-4145-a056-15370a4b2f53
+		summarizeBy: none
+		sourceColumn: tier
+
+		annotation SummarizationSetBy = Automatic
+
+	/// Reference supplier score from the master record, in source points. Procurement observations are measured separately.
+	column avg_quality_score
+		dataType: double
+		lineageTag: 4140f09e-e60c-4e7d-9802-6911ab5ef3c2
+		summarizeBy: none
+		sourceColumn: avg_quality_score
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition dim_supplier = m
+		mode: import
+		source =
+				let
+				  Source = Csv.Document(File.Contents(Text.TrimEnd(DatasetFolder, {"\", "/"}) & "\dim_supplier.csv"), [Delimiter = ",", Columns = 8, QuoteStyle = QuoteStyle.None]),
+				  #"Promoted headers" = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				  #"Changed column type" = Table.TransformColumnTypes(#"Promoted headers", {{"supplier_id", Int64.Type}, {"supplier_key", type text}, {"supplier_name", type text}, {"country", type text}, {"city", type text}, {"specialty", type text}, {"tier", type text}, {"avg_quality_score", type number}})
+				in
+				  #"Changed column type"
+
+	annotation PBI_ResultType = Table
+

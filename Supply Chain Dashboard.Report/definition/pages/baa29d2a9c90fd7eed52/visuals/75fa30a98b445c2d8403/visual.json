@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "75fa30a98b445c2d8403",
+  "position": {
+    "x": 44,
+    "y": 82,
+    "z": 10000,
+    "height": 35,
+    "width": 826,
+    "tabOrder": -6001
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Procurement spend and supplier performance by order date",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "17pt",
+                      "color": "#C1D0E2"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

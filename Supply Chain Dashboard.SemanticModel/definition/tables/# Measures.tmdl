@@ -1,0 +1,343 @@
+/// Supply chain measures grouped by business area.
+table '# Measures'
+	lineageTag: 10deeb47-4eed-450d-b3e1-f61bb89c159b
+
+	/// Last observed month-end in the selected dates and inventory scope. An interval without a snapshot returns blank.
+	measure 'Inventory Snapshot Date' =
+			VAR SnapshotKey = MAX ( fact_inventory[date_key] )
+			RETURN
+			    IF ( NOT ISBLANK ( SnapshotKey ), CALCULATE ( MAXX ( fact_inventory, RELATED ( dim_date[date] ) ), KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ) ) )
+		formatString: mmm d, yyyy
+		displayFolder: Inventory
+		lineageTag: 70f4c480-d02e-4c57-b77f-ee0b26196947
+
+	/// Units at the last observed month-end in the selection. Add SKU and facility positions only at that snapshot.
+	measure 'Closing Stock Units' =
+			VAR SnapshotKey = MAX ( fact_inventory[date_key] )
+			RETURN
+			    IF ( NOT ISBLANK ( SnapshotKey ), CALCULATE ( SUM ( fact_inventory[stock_level] ), KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ) ) )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: a9d74d36-ffef-44c7-b871-ad0e3a5bc0cc
+
+	/// Units at the last observed month-end in the selection. Add SKU and facility positions only at that snapshot.
+	measure 'Closing Safety Stock Units' =
+			VAR SnapshotKey = MAX ( fact_inventory[date_key] )
+			RETURN
+			    IF ( NOT ISBLANK ( SnapshotKey ), CALCULATE ( SUM ( fact_inventory[safety_stock_level] ), KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ) ) )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: ea6c02bc-a1b1-4854-96c9-200921da28f9
+
+	/// Units at the last observed month-end in the selection. Add SKU and facility positions only at that snapshot.
+	measure 'Closing Reorder Point Units' =
+			VAR SnapshotKey = MAX ( fact_inventory[date_key] )
+			RETURN
+			    IF ( NOT ISBLANK ( SnapshotKey ), CALCULATE ( SUM ( fact_inventory[reorder_point] ), KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ) ) )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: bc74cea1-dc0b-4ebb-9ea2-6b8bf4eb1543
+
+	/// Count of SKU and facility positions strictly below their own threshold at the last observed month-end. Equality is excluded.
+	measure 'Positions Below Safety Stock' =
+			VAR SnapshotKey = MAX ( fact_inventory[date_key] )
+			RETURN
+			    IF ( NOT ISBLANK ( SnapshotKey ), CALCULATE ( COALESCE ( COUNTROWS ( FILTER ( fact_inventory, fact_inventory[stock_level] < fact_inventory[safety_stock_level] ) ), 0 ), KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ) ) )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: 6c20e985-5d5e-4389-8714-483207bf852b
+
+	/// Count of SKU and facility positions strictly below their own threshold at the last observed month-end. Equality is excluded.
+	measure 'Positions Below Reorder Point' =
+			VAR SnapshotKey = MAX ( fact_inventory[date_key] )
+			RETURN
+			    IF ( NOT ISBLANK ( SnapshotKey ), CALCULATE ( COALESCE ( COUNTROWS ( FILTER ( fact_inventory, fact_inventory[stock_level] < fact_inventory[reorder_point] ) ), 0 ), KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ) ) )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: e817a063-0449-4471-bb9b-20a0e0794c50
+
+	/// Procurement records by order date. A purchase order reference can repeat.
+	measure 'Procurement Lines' = COUNTROWS ( fact_procurement )
+		formatString: #,0
+		displayFolder: Suppliers
+		lineageTag: bfb9fcf4-8342-43f1-8025-018914a37c3e
+
+	/// Ordered item units by order date.
+	measure 'Units Ordered' = SUM ( fact_procurement[order_quantity] )
+		formatString: #,0
+		displayFolder: Suppliers
+		lineageTag: 213c0637-81bc-4a0a-a9cd-2085896a42b5
+
+	/// Mean reported lead time in days, equally weighted per procurement line, by order date.
+	measure 'Average Reported Lead Time' = AVERAGE ( fact_procurement[lead_time_days] )
+		formatString: #,0.00
+		displayFolder: Suppliers
+		lineageTag: 714cf5bc-a16c-4f70-ac6b-e9d2aa918f20
+
+	/// Mean source quality score in points per procurement line, by order date.
+	measure 'Average Procurement Quality Score' = AVERAGE ( fact_procurement[quality_score] )
+		formatString: #,0.00
+		displayFolder: Suppliers
+		lineageTag: aab5c021-2d88-4355-9e6a-11b0f337d7a1
+
+	/// Procurement lines by the recorded delivery field. The source caps dates at the calendar end.
+	measure 'Procurement Lines by Recorded Delivery Date' = CALCULATE ( [Procurement Lines], USERELATIONSHIP ( fact_procurement[delivery_date_key], dim_date[date_key] ) )
+		formatString: #,0
+		displayFolder: Suppliers
+		lineageTag: a5ee635f-3815-4da6-9655-480970314d53
+
+	/// Extended cost on procurement lines by order date, in US dollars.
+	measure 'Procurement Spend (USD)' = SUM ( fact_procurement[total_cost] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Suppliers
+		lineageTag: c492b0df-f544-4037-b7bb-435a69c46544
+
+	/// Spend in US dollars divided by ordered item units. Product mix affects comparisons.
+	measure 'Average Purchase Unit Cost (USD)' = DIVIDE ( [Procurement Spend (USD)], [Units Ordered] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Suppliers
+		lineageTag: e7ac4eb2-a02a-46a7-b8d2-b313a75e5f42
+
+	/// Recorded item units produced by production date.
+	measure 'Units Produced' = SUM ( fact_production[quantity_produced] )
+		formatString: #,0
+		displayFolder: Production
+		lineageTag: e8664b1c-ab39-451a-8158-9abed3332b23
+
+	/// Recorded defective units by production date.
+	measure 'Defective Units' = SUM ( fact_production[defective_units] )
+		formatString: #,0
+		displayFolder: Production
+		lineageTag: e0d0cd8b-abb6-4453-b078-546f74deb5f5
+
+	/// Recorded defective units divided by produced units in the same scope.
+	measure 'Observed Defect Rate' = DIVIDE ( [Defective Units], [Units Produced] )
+		formatString: 0.00%
+		displayFolder: Production
+		lineageTag: 8d62ae2e-6a1e-4391-92fc-14f830df5859
+
+	/// Sales records by source sales date. Order numbers can repeat across customers.
+	measure 'Sales Lines' = COUNTROWS ( fact_sales )
+		formatString: #,0
+		displayFolder: Customers
+		lineageTag: d69396d1-f4b0-42c1-a609-f2d2e80c4196
+
+	/// Sold item units by source sales date.
+	measure 'Units Sold' = SUM ( fact_sales[quantity_sold] )
+		formatString: #,0
+		displayFolder: Customers
+		lineageTag: e2defdeb-9707-4898-ab24-7f9c1e727e5d
+
+	/// Distinct customer IDs with a sales record in the selection. Recalculated for totals.
+	measure 'Buying Customers' = DISTINCTCOUNT ( fact_sales[customer_id] )
+		formatString: #,0
+		displayFolder: Customers
+		lineageTag: 3cb66c06-4d2b-40cb-9040-a8b278cbdec8
+
+	/// Sum of recorded amounts in US dollars by source sales date.
+	measure 'Gross Sales (USD)' = SUM ( fact_sales[gross_revenue] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Customers
+		lineageTag: 33c11f9b-2119-4dbe-8d05-2c65463b6849
+
+	/// Sum of recorded amounts in US dollars by source sales date.
+	measure 'Sales Discounts (USD)' = SUM ( fact_sales[discount_amount] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Customers
+		lineageTag: 0b1e5089-d4b2-40b6-8340-5b79b829c425
+
+	/// Sum of recorded amounts in US dollars by source sales date.
+	measure 'Net Sales (USD)' = SUM ( fact_sales[net_revenue] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Customers
+		lineageTag: 89c22859-1612-47a2-822d-d65cf3b926b2
+
+	/// Sum of recorded amounts in US dollars by source sales date.
+	measure 'Sales Cost (USD)' = SUM ( fact_sales[total_cost] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Customers
+		lineageTag: 1b5fcc7f-7904-4995-8a99-5779cbb8b685
+
+	/// Sum of recorded amounts in US dollars by source sales date.
+	measure 'Sales Profit (USD)' = SUM ( fact_sales[profit] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Customers
+		lineageTag: fbf24e78-8531-424a-baa2-f5e3f243014c
+
+	/// Total sales profit divided by total net sales in the same context.
+	measure 'Sales Profit Margin' = DIVIDE ( [Sales Profit (USD)], [Net Sales (USD)] )
+		formatString: 0.00%
+		displayFolder: Customers
+		lineageTag: 880cbd83-15e6-429e-b20c-6c5086650ddf
+
+	/// Shipment records by ship date. Filters from unverified master data return blank.
+	measure Shipments = IF ( NOT ( ISFILTERED ( dim_product ) || ISFILTERED ( dim_customer ) || ISFILTERED ( dim_facility ) || ISFILTERED ( dim_supplier ) ), COUNTROWS ( fact_shipment ) )
+		formatString: #,0
+		displayFolder: Deliveries
+		lineageTag: 15da71ec-f80b-44a3-96ae-f1f8ef9966f5
+
+	/// Item units in shipment records by ship date. Filters from unverified master data return blank.
+	measure 'Shipment Units' = IF ( NOT ( ISFILTERED ( dim_product ) || ISFILTERED ( dim_customer ) || ISFILTERED ( dim_facility ) || ISFILTERED ( dim_supplier ) ), SUM ( fact_shipment[quantity] ) )
+		formatString: #,0
+		displayFolder: Deliveries
+		lineageTag: aac3aafe-7541-4404-b19a-f32e8305705a
+
+	/// Recorded shipment weight in kilograms by ship date. Filters from unverified master data return blank.
+	measure 'Shipment Weight (kg)' = IF ( NOT ( ISFILTERED ( dim_product ) || ISFILTERED ( dim_customer ) || ISFILTERED ( dim_facility ) || ISFILTERED ( dim_supplier ) ), SUM ( fact_shipment[total_weight_kg] ) )
+		formatString: #,0.00
+		displayFolder: Deliveries
+		lineageTag: 6da88482-0de8-4e1d-bac8-c95aded4b602
+
+	/// Shipment records in current scope with source status Delivered, by ship date.
+	measure 'Delivered Shipments' =
+			VAR Eligible = [Shipments]
+			RETURN IF ( NOT ISBLANK ( Eligible ), COALESCE ( CALCULATE ( [Shipments], KEEPFILTERS ( fact_shipment[status] = "Delivered" ) ), 0 ) )
+		formatString: #,0
+		displayFolder: Deliveries
+		lineageTag: a50be024-697e-4246-83ad-63cef1e9fc6c
+
+	/// Shipment records in current scope with source status Delayed, by ship date.
+	measure 'Delayed Shipments' =
+			VAR Eligible = [Shipments]
+			RETURN IF ( NOT ISBLANK ( Eligible ), COALESCE ( CALCULATE ( [Shipments], KEEPFILTERS ( fact_shipment[status] = "Delayed" ) ), 0 ) )
+		formatString: #,0
+		displayFolder: Deliveries
+		lineageTag: 01bbc6a3-8cfb-41b9-8095-e7beaab0e02e
+
+	/// Share of selected shipment records showing Delayed at extraction, grouped by ship date. The denominator follows all active filters.
+	measure 'Delayed Shipment Share' = DIVIDE ( [Delayed Shipments], [Shipments] )
+		formatString: 0.00%
+		displayFolder: Deliveries
+		lineageTag: df3d5615-4906-4de1-a240-480dfca64a1c
+
+	/// Records marked Delivered grouped by their recorded delivery date. The source does not establish actual receipt.
+	measure 'Delivered Shipments by Recorded Delivery Date' = CALCULATE ( [Delivered Shipments], USERELATIONSHIP ( fact_shipment[delivery_date_key], dim_date[date_key] ) )
+		formatString: #,0
+		displayFolder: Deliveries
+		lineageTag: 50bfe06f-f641-45f3-8dbd-6b9c13fc1214
+
+	/// Recorded freight cost in US dollars at shipment grain by ship date. Unverified master-data slices return blank.
+	measure 'Shipping Cost (USD)' = IF ( NOT ( ISFILTERED ( dim_product ) || ISFILTERED ( dim_customer ) || ISFILTERED ( dim_facility ) || ISFILTERED ( dim_supplier ) ), SUM ( fact_shipment[shipping_cost] ) )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Deliveries
+		lineageTag: 1a5604ae-7c35-4643-b67d-2dec38a94e43
+
+	/// Suppliers with procurement activity in the current order-date and supplier filter context.
+	measure 'Active Suppliers' = DISTINCTCOUNTNOBLANK ( fact_procurement[supplier_id] )
+		formatString: #,0
+		displayFolder: Suppliers
+		lineageTag: 3c696f5d-1d01-4927-859f-e43aaded6fca
+
+	/// Share of procurement spend across suppliers in the current external selection. The denominator retains order-date and slicer selections.
+	measure 'Supplier Spend Share' = DIVIDE ( [Procurement Spend (USD)], CALCULATE ( [Procurement Spend (USD)], ALLSELECTED ( dim_supplier ) ) )
+		formatString: 0.0%
+		displayFolder: Suppliers
+		lineageTag: 8640272f-97c8-4680-815f-ebdb8608d307
+
+	/// Distinct products with at least one facility position below safety stock at the latest snapshot in the selection.
+	measure 'Products Below Safety Stock' =
+			VAR SnapshotKey =
+			    CALCULATE (
+			        MAX ( fact_inventory[date_key] ),
+			        ALLSELECTED ( dim_product ),
+			        ALLSELECTED ( dim_facility )
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( SnapshotKey ),
+			        COALESCE (
+			            CALCULATE (
+			                DISTINCTCOUNTNOBLANK ( fact_inventory[product_id] ),
+			                KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey ),
+			                KEEPFILTERS (
+			                    NOT ISBLANK ( fact_inventory[stock_level] )
+			                        && NOT ISBLANK ( fact_inventory[safety_stock_level] )
+			                        && fact_inventory[stock_level] < fact_inventory[safety_stock_level]
+			                )
+			            ),
+			            0
+			        )
+			    )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: 91892255-be51-4727-b3ff-31eb8f603c54
+
+	/// Units needed to reach safety stock at deficient product and facility positions in the latest selected snapshot. Surpluses elsewhere do not offset the shortfall.
+	measure 'Safety Stock Shortfall Units' =
+			VAR SnapshotKey =
+			    CALCULATE (
+			        MAX ( fact_inventory[date_key] ),
+			        ALLSELECTED ( dim_product ),
+			        ALLSELECTED ( dim_facility )
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( SnapshotKey ),
+			        CALCULATE (
+			            SUMX (
+			                FILTER (
+			                    fact_inventory,
+			                    NOT ISBLANK ( fact_inventory[stock_level] )
+			                        && NOT ISBLANK ( fact_inventory[safety_stock_level] )
+			                        && fact_inventory[stock_level] < fact_inventory[safety_stock_level]
+			                ),
+			                fact_inventory[safety_stock_level] - fact_inventory[stock_level]
+			            ),
+			            KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: 98c27d3d-0cc7-4d07-bc50-83a98d06985b
+
+	/// Units needed to reach the recorded reorder points at deficient product and facility positions in the latest selected snapshot. This measures the threshold gap.
+	measure 'Reorder Shortfall Units' =
+			VAR SnapshotKey =
+			    CALCULATE (
+			        MAX ( fact_inventory[date_key] ),
+			        ALLSELECTED ( dim_product ),
+			        ALLSELECTED ( dim_facility )
+			    )
+			RETURN
+			    IF (
+			        NOT ISBLANK ( SnapshotKey ),
+			        CALCULATE (
+			            SUMX (
+			                FILTER (
+			                    fact_inventory,
+			                    NOT ISBLANK ( fact_inventory[stock_level] )
+			                        && NOT ISBLANK ( fact_inventory[reorder_point] )
+			                        && fact_inventory[stock_level] < fact_inventory[reorder_point]
+			                ),
+			                fact_inventory[reorder_point] - fact_inventory[stock_level]
+			            ),
+			            KEEPFILTERS ( fact_inventory[date_key] = SnapshotKey )
+			        )
+			    )
+		formatString: #,0
+		displayFolder: Inventory
+		lineageTag: e796ca4e-830b-4c03-95ec-b9b677a46646
+
+	/// Total recorded US-dollar freight cost divided by total recorded shipment weight in kilograms for shipments in the selection.
+	measure 'Shipping Cost per kg (USD)' = DIVIDE ( [Shipping Cost (USD)], [Shipment Weight (kg)] )
+		formatString: "$"#,0.00;("$"#,0.00);"$"0.00
+		displayFolder: Deliveries
+		lineageTag: b2575e8d-3580-48bb-a3d7-abab46d689ee
+
+	/// Customer or channel share of net sales in the outer customer selection. External customer, date and product filters are retained in the denominator.
+	measure 'Customer Net Sales Share' = DIVIDE ( [Net Sales (USD)], CALCULATE ( [Net Sales (USD)], ALLSELECTED ( dim_customer ) ) )
+		formatString: 0.00%
+		displayFolder: Customers
+		lineageTag: f29fd777-827f-4548-a776-aeb73161e9e5
+
+	column Placeholder
+		isHidden
+		lineageTag: 27bcc0e2-22c3-4ca9-82f3-a9e2584b012e
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Placeholder]
+
+	partition '# Measures' = calculated
+		mode: import
+		source = ROW ( "Placeholder", 0 )
+
